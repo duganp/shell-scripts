@@ -1,0 +1,14 @@
+#!/bin/sh
+# Grep source files in the current directory and its descendants with the given options and pattern.
+# Can handle pathnames containing spaces or any other character (other than '\0').
+# Excludes all 'node_modules' directories from search.
+
+if test -z "$1"; then
+   echo "Usage: `basename $0` [grep-options] <pattern>"
+   exit
+fi
+
+source_ext_list="asm c C cc config cpp cs css cxx def env h H hh hpp htm html hxx idl inc inl java js jsx json kt m m4 md odl pug py rc sh snap sql strings swift ts tsx txt w x xml y yaml yml"
+find_predicate="`echo $source_ext_list | sed 's/[A-Za-z][A-Za-z0-9]*/-name *.& -o/g'` -name .*"
+set -f  # Disable filename substitution ("globbing")
+find . \( -name .git -o -name node_modules \) -prune -o -type f \( $find_predicate \) -print0 | xargs --null grep -n -H "$@"
